@@ -1,1 +1,42 @@
+version: '3.8'
+services:
+  # First container with Database
+  postgresql:
+    container_name: postgresql
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      # Set environment variables for this container
+      # Usually available variables described in image page - https://hub.docker.com/_/postgres
+      # There is user login and password for access database
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      # Map database port to host machine
+      - 5432:5432
+    networks:
+      - postgresql-network
 
+  # Second container with pgAdmin
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:6.20
+    restart: unless-stopped
+    environment:
+      # Variables description for this soft can be found in official documentation - https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+      # Next two variables just required for startup, but right for us in this example it meens just nothing ¯\_(ツ)_/¯
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com # This varialbe 
+      PGADMIN_DEFAULT_PASSWORD: root
+
+      # Next two variables disable login screen for pgAdmin 'cause we launch it locally
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      # Map port of webUI to some host port
+      - 5050:80
+    networks:
+      - postgresql-network
+
+networks:
+  postgresql-network:
+    name: "postgresql-network"
